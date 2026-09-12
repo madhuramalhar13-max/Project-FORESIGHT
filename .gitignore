@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Raw project datasets
+data/calendar.csv
+data/inventory_snapshots.csv
+data/sales_daily.csv
+data/sku_master.csv
