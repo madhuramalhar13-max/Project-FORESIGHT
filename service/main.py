@@ -200,16 +200,20 @@ def get_recommendations():
         )
 
     result = risk_df[
-        [
-            "SKU",
-            "Overall_Risk",
-            "Risk_Score",
-            "Recommendation"
-        ]
-    ].copy()
+    [
+        "SKU",
+        "Stockout_Risk",
+        "Overstock_Risk",
+        "Overall_Risk",
+        "Risk_Score",
+        "Recommendation"
+    ]
+].copy()
 
     result["SKU"] = result["SKU"].astype(str)
     result["Overall_Risk"] = result["Overall_Risk"].astype(str)
+    result["Stockout_Risk"] = result["Stockout_Risk"].astype(str)
+    result["Overstock_Risk"] = result["Overstock_Risk"].astype(str)
     result["Risk_Score"] = result["Risk_Score"].astype(int)
     result["Recommendation"] = result["Recommendation"].astype(str)
 
