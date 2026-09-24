@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-
-
+import requests
 # ==================================================
 # PAGE CONFIG
 # ==================================================
@@ -365,7 +364,7 @@ st.markdown(
 # ==================================================
 # FILE PATHS
 # ==================================================
-
+API_URL = "https://project-foresight-2eia.onrender.com"
 RISK_FILE = "data/processed/inventory_risk.csv"
 FORECAST_FILE = "data/processed/weekly_forecasts.csv"
 
@@ -377,10 +376,52 @@ FORECAST_FILE = "data/processed/weekly_forecasts.csv"
 @st.cache_data
 def load_risk_data():
 
+    # Load detailed inventory information from CSV
     if not os.path.exists(RISK_FILE):
         return None
 
+    local_df = pd.read_csv(RISK_FILE)
+
+    # Get latest risk information from deployed API
+    try:
+        response = requests.get(
+            f"{API_URL}/recommendations",
+            timeout=10
+        )
+
+        if response.status_code == 200:
+
+            api_df = pd.DataFrame(response.json())
+
+            # Remove old risk columns from local data
+            risk_columns = [
+                "Stockout_Risk",
+                "Overstock_Risk",
+                "Overall_Risk",
+                "Risk_Score",
+                "Recommendation"
+            ]
+
+            local_df = local_df.drop(
+                columns=risk_columns,
+                errors="ignore"
+            )
+
+            # Combine detailed inventory data + API risk data
+            local_df = local_df.merge(
+                api_df,
+                on="SKU",
+                how="left"
+            )
+
+            return local_df
+
+    except requests.RequestException:
+        pass
+
+    # If API is unavailable, use local CSV
     return pd.read_csv(RISK_FILE)
+    
 
 
 @st.cache_data
@@ -393,6 +434,7 @@ def load_forecast_data():
 
 
 risk_df = load_risk_data()
+
 forecast_df = load_forecast_data()
 
 
